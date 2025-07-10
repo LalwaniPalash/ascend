@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Add Subscription{% endblock %}
+{% import '_macros.html' as macros %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-calendar-event-line me-2"></i>Add Subscription
+                    </h2>
+                    <form id="subscriptionForm" method="POST" action="{{ url_for('views.add_subscription') }}">
+                        <div class="mb-4">
+                            <label for="sub-name" class="form-label">Subscription Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-price-tag-3-line"></i></span>
+                                <input type="text" class="form-control" id="sub-name" name="sub-name" placeholder="Enter subscription name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="renew-frequency" class="form-label">Renew Frequency</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-repeat-line"></i></span>
+                                <select class="form-select" id="renew-frequency" name="renew-frequency" required>
+                                    <option value="" disabled selected>Select Renew Frequency</option>
+                                    <option value="Daily">Daily</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="Biweekly">Biweekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Biannual">Biannual</option>
+                                    <option value="Annual">Annual</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="last-payment" class="form-label">Last Payment</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+                                <input type="date" class="form-control" id="last-payment" name="last-payment" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ macros.currency_symbol(current_user.currency) }}</span>
+                                <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" step="0.01" min="0" max="1000000000000" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="auto_add_transaction" name="auto_add_transaction">
+                            <label class="form-check-label" for="auto_add_transaction">Auto Add Transaction</label>
+                        </div>
+                        
+                        <div id="account-group" class="mb-4" style="display: none;">
+                            <label for="account" class="form-label">Account</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-bank-line"></i></span>
+                                <select class="form-select" id="account" name="account">
+                                    <option value="">Select Account</option>
+                                    {% for account in accounts %}
+                                    <option value="{{ account.id }}">{{ account.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-save-line me-2"></i>Add Subscription
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('auto_add_transaction');
+    const accountGroup = document.getElementById('account-group');
+    const accountSelect = document.getElementById('account');
+
+    function toggleAccountGroup() {
+        if (checkbox.checked) {
+            accountGroup.style.display = 'block';
+            accountSelect.required = true;
+        } else {
+            accountGroup.style.display = 'none';
+            accountSelect.required = false;
+        }
+    }
+
+    checkbox.addEventListener('change', toggleAccountGroup);
+    toggleAccountGroup();
+
+    function setDateInputToToday() {
+        let dateInputField = document.getElementById('last-payment');
+        let currentDate = new Date();
+        let year = currentDate.getFullYear();
+        let month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        let day = currentDate.getDate().toString().padStart(2, '0');
+        dateInputField.value = `${year}-${month}-${day}`;
+    }
+    setDateInputToToday();
+});
+</script>
+{% endblock %}

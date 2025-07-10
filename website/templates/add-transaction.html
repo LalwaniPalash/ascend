@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Add Transaction{% endblock %}
+{% import '_macros.html' as macros %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-exchange-dollar-line me-2"></i>Add Transaction
+                    </h2>
+                    <form id="transactionForm" method="POST" action="{{ url_for('views.add_transaction') }}">
+                        <div class="mb-4">
+                            <label class="form-label">Transaction Type</label>
+                            <div class="d-flex justify-content-center">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="transaction-type" id="transaction-type-income" value="Income" required>
+                                    <label class="btn btn-outline-primary" for="transaction-type-income"><i class="ri-arrow-up-line"></i> Income</label>
+                    
+                                    <input type="radio" class="btn-check" name="transaction-type" id="transaction-type-expense" value="Expense" required>
+                                    <label class="btn btn-outline-primary" for="transaction-type-expense"><i class="ri-arrow-down-line"></i> Expense</label>
+                    
+                                    <input type="radio" class="btn-check" name="transaction-type" id="transaction-type-transfer" value="Transfer" required>
+                                    <label class="btn btn-outline-primary" for="transaction-type-transfer"><i class="ri-exchange-line"></i> Transfer</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="date" class="form-label">Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ macros.currency_symbol(current_user.currency) }}</span>
+                                <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" step="0.01" min="0" max="1000000000000" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-text"></i></span>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Add description to this Transaction"></textarea>
+                            </div>
+                            <small id="charCount" class="form-text text-muted">0/250 characters</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="account_to_id" class="form-label">Account To</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-bank-line"></i></span>
+                                <select class="form-select" id="account_to_id" name="account_to_id">
+                                    <option value="">Select Account</option>
+                                    {% for account in accounts %}
+                                    <option value="{{ account.id }}">{{ account.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="account_from_id" class="form-label">Account From</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-bank-line"></i></span>
+                                <select class="form-select" id="account_from_id" name="account_from_id">
+                                    <option value="0" selected disabled>Select Account</option>
+                                    {% for account in accounts %}
+                                    <option value="{{ account.id }}">{{ account.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="budget_category_id" class="form-label">Budget Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-price-tag-3-line"></i></span>
+                                <select class="form-select" id="budget_category_id" name="budget_category_id">
+                                    <option value="">Select Category</option>
+                                    {% for category in budget_categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="subscription_id" class="form-label">Subscription</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
+                                <select class="form-select" id="subscription_id" name="subscription_id">
+                                    <option value="">Select Subscription</option>
+                                    {% for subscription in subscriptions %}
+                                    <option value="{{ subscription.id }}">{{ subscription.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-save-line me-2"></i>Add Transaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const transactionTypeRadios = document.querySelectorAll('input[name="transaction-type"]');
+    const accountFromSelect = document.getElementById('account_from_id');
+    const accountToSelect = document.getElementById('account_to_id');
+    const budgetSelect = document.getElementById('budget_category_id');
+    const subscriptionSelect = document.getElementById('subscription_id');
+    const textarea = document.getElementById('description');
+    const charCount = document.getElementById('charCount');
+
+    function updateAccountFields() {
+        const selectedType = document.querySelector('input[name="transaction-type"]:checked').value;
+        if (selectedType === 'Income') {
+            accountToSelect.disabled = false;
+            accountToSelect.required = true;
+            accountFromSelect.disabled = true;
+            budgetSelect.disabled = true;
+            subscriptionSelect.disabled = true;
+        } else if (selectedType === 'Expense') {
+            accountFromSelect.disabled = false;
+            accountFromSelect.required = true;
+            budgetSelect.disabled = false;
+            subscriptionSelect.disabled = false;
+            accountToSelect.disabled = true;
+        } else if (selectedType === 'Transfer') {
+            accountFromSelect.disabled = false;
+            accountFromSelect.required = true;
+            accountToSelect.disabled = false;
+            accountToSelect.required = true;
+            budgetSelect.disabled = true;
+            subscriptionSelect.disabled = true;
+        }
+    }
+
+    function updateCharCount() {
+        charCount.textContent = `${textarea.value.length}/250 characters`;
+    }
+
+    function limitTextarea() {
+        const maxChars = 250;
+        textarea.addEventListener('input', function() {
+            const currentChars = textarea.value.length;
+            if (currentChars > maxChars) {
+                textarea.value = textarea.value.slice(0, maxChars);
+            }
+            updateCharCount();
+        });
+    }
+
+    function setDateInputToToday() {
+        let dateInputField = document.getElementById('date');
+        let currentDate = new Date();
+        let year = currentDate.getFullYear();
+        let month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        let day = currentDate.getDate().toString().padStart(2, '0');
+        dateInputField.value = `${year}-${month}-${day}`;
+    }
+
+    transactionTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateAccountFields);
+    });
+    setDateInputToToday();
+    textarea.addEventListener('input', updateCharCount);
+    limitTextarea();
+    updateAccountFields();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Add Credit Card{% endblock %}
+{% import '_macros.html' as macros %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-bank-card-line me-2"></i>Add Credit Card
+                    </h2>
+                    <form method="POST" action="{{ url_for('views.add_credit_card') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Credit Card Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-bank-card-fill"></i></span>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Visa, MasterCard" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="limit" class="form-label">Credit Limit</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ macros.currency_symbol(current_user.currency) }}</span>
+                                <input type="number" step="0.01" class="form-control" id="limit" name="limit" placeholder="Enter the credit limit" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="current-balance" class="form-label">Current Balance</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ macros.currency_symbol(current_user.currency) }}</span>
+                                <input type="number" step="0.01" class="form-control" id="current-balance" name="current-balance" placeholder="Enter the current balance" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interest-rate" class="form-label">Interest Rate (%)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-percent-line"></i></span>
+                                <input type="number" step="0.01" class="form-control" id="interest-rate" name="interest-rate" placeholder="Enter the interest rate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="statement-due-date" class="form-label">Next Statement Due Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-event-line"></i></span>
+                                <input type="date" class="form-control" id="statement-due-date" name="statement-due-date" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="min-payment-due-date" class="form-label">Next Minimum Payment Due Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-check-line"></i></span>
+                                <input type="date" class="form-control" id="min-payment-due-date" name="min-payment-due-date" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="billing-cycle-days" class="form-label">Billing Cycle Days</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-repeat-line"></i></span>
+                                <input type="number" class="form-control" id="billing-cycle-days" name="billing-cycle-days" placeholder="Enter billing cycle days" required min="25" max="31">
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-save-line me-2"></i>Add Credit Card
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

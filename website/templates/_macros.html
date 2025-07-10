@@ -1,0 +1,3 @@
+{% macro currency_symbol(currency) %}
+    {% if currency == 'USD' %}${% elif currency == 'EUR' %}€{% elif currency == 'GBP' %}£{% elif currency == 'INR' %}₹{% elif currency == 'JPY' %}¥{% elif currency == 'AUD' %}A${% elif currency == 'CAD' %}C${% elif currency == 'CHF' %}Fr{% elif currency == 'CNY' %}¥{% elif currency == 'SEK' %}kr{% elif currency == 'NZD' %}NZ${% else %}{{ currency }} {% endif %}
+{% endmacro %} 

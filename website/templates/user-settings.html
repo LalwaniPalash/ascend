@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}User Settings{% endblock %}
+{% import '_macros.html' as macros %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-user-settings-line me-2"></i>User Settings
+                    </h2>
+                    <form id="userSettingsForm" method="POST" action="{{ url_for('views.update_profile') }}">
+                        <div class="mb-3">
+                            <label for="name-prefix" class="form-label">Name Prefix</label>
+                            <select class="form-select" id="name-prefix" name="name-prefix">
+                                <option value="">Select prefix</option>
+                                <option value="Mr." {% if current_user.name_prefix == 'Mr.' %}selected{% endif %}>Mr.</option>
+                                <option value="Ms." {% if current_user.name_prefix == 'Ms.' %}selected{% endif %}>Ms.</option>
+                                <option value="Mrs." {% if current_user.name_prefix == 'Mrs.' %}selected{% endif %}>Mrs.</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="first-name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first-name" name="first-name" value="{{ current_user.first_name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="last-name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last-name" name="last-name" value="{{ current_user.last_name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="currency" class="form-label">Preferred Currency</label>
+                            <select class="form-select" id="currency" name="currency" required>
+                                <option value="USD" {% if current_user.currency == 'USD' %}selected{% endif %}>USD - US Dollar ({{ macros.currency_symbol('USD') }})</option>
+                                <option value="EUR" {% if current_user.currency == 'EUR' %}selected{% endif %}>EUR - Euro ({{ macros.currency_symbol('EUR') }})</option>
+                                <option value="GBP" {% if current_user.currency == 'GBP' %}selected{% endif %}>GBP - British Pound ({{ macros.currency_symbol('GBP') }})</option>
+                                <option value="INR" {% if current_user.currency == 'INR' %}selected{% endif %}>INR - Indian Rupee ({{ macros.currency_symbol('INR') }})</option>
+                                <option value="JPY" {% if current_user.currency == 'JPY' %}selected{% endif %}>JPY - Japanese Yen ({{ macros.currency_symbol('JPY') }})</option>
+                                <option value="AUD" {% if current_user.currency == 'AUD' %}selected{% endif %}>AUD - Australian Dollar ({{ macros.currency_symbol('AUD') }})</option>
+                                <option value="CAD" {% if current_user.currency == 'CAD' %}selected{% endif %}>CAD - Canadian Dollar ({{ macros.currency_symbol('CAD') }})</option>
+                                <option value="CHF" {% if current_user.currency == 'CHF' %}selected{% endif %}>CHF - Swiss Franc ({{ macros.currency_symbol('CHF') }})</option>
+                                <option value="CNY" {% if current_user.currency == 'CNY' %}selected{% endif %}>CNY - Chinese Yuan ({{ macros.currency_symbol('CNY') }})</option>
+                                <option value="SEK" {% if current_user.currency == 'SEK' %}selected{% endif %}>SEK - Swedish Krona ({{ macros.currency_symbol('SEK') }})</option>
+                                <option value="NZD" {% if current_user.currency == 'NZD' %}selected{% endif %}>NZD - New Zealand Dollar ({{ macros.currency_symbol('NZD') }})</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="time-zone" class="form-label">Time Zone</label>
+                            <select class="form-select" id="time-zone" name="time-zone" required>
+                                {% for timezone in timezones %}
+                                    <option value="{{ timezone }}" {% if timezone == current_user.time_zone %}selected{% endif %}>{{ timezone }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>                        
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-save-line me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <h3 class="text-center mb-4">Change Password</h3>
+                    <form id="changePasswordForm" method="POST" action="{{ url_for('auth.changepass') }}">
+                        <div class="mb-3">
+                            <label for="current-password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current-password" name="current-password" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="new-password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new-password" name="new-password" pattern=".{8,}" title="8 characters minimum" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm-password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm-password" name="confirm-password" pattern=".{8,}" title="8 characters minimum" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-secondary btn-lg">
+                                <i class="ri-lock-password-line me-2"></i>Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

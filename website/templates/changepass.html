@@ -1,0 +1,30 @@
+{% extends "base.html" %} 
+{% block title %} Change Password {% endblock %}
+{% block content %}
+<form method="POST">
+    <br />
+    <h3 align="center">Change Password</h3>
+    <br />
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input required type="email" class="form-control" id="email" name="email" placeholder="Enter email"/>
+    </div>
+    <br />
+    <div class="form-group">
+      <label for="oldpassword">Old Password</label>
+      <input required type="password" class="form-control" id="oldpassword" name="oldpassword" placeholder="Enter old password"/>
+    </div>
+    <br />
+    <div class="form-group">
+      <label for="newpassword">New Password</label>
+      <input required type="password" class="form-control" id="newpassword" name="newpassword" placeholder="Enter new password"/>
+    </div>
+    <br />
+    <div class="form-group">
+      <label for="confirm_newpassword">Confirm New Password</label>
+      <input required type="password" class="form-control" id="confirm_newpassword" name="confirm_newpassword" placeholder="Confirm new password"/>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Change Password</button>
+  </form>
+{% endblock %}

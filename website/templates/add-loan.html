@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Add Loan{% endblock %}
+{% import '_macros.html' as macros %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-hand-coin-line me-2"></i>Add New Loan
+                    </h2>
+                    <form id="loanForm" method="POST" action="{{ url_for('views.add_loan') }}">
+                        <div class="mb-4">
+                            <label for="counterparty-name" class="form-label">Counterparty Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-user-line"></i></span>
+                                <input type="text" class="form-control" id="counterparty-name" name="counterparty-name" placeholder="Enter counterparty name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="loan-type" class="form-label">Loan Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-exchange-funds-line"></i></span>
+                                <select class="form-select" id="loan-type" name="loan-type" required>
+                                    <option value="" disabled selected>Select loan type</option>
+                                    <option value="Given">Given</option>
+                                    <option value="Taken">Taken</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="loan-amount" class="form-label">Loan Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">{{ macros.currency_symbol(current_user.currency) }}</span>
+                                <input type="number" class="form-control" id="loan-amount" name="loan-amount" placeholder="Enter loan amount" step="0.01" min="0" max="1000000000000" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            <input class="form-check-input" type="checkbox" id="interest-checkbox" name="interest-checkbox">
+                            <label class="form-check-label" for="interest-checkbox">
+                                Include Interest Rate
+                            </label>
+                        </div>
+                        
+                        <div id="interest-fields" class="mb-4" style="display: none;">
+                            <label for="interest-rate" class="form-label">Interest Rate (%)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-percent-line"></i></span>
+                                <input type="number" class="form-control" id="interest-rate" name="interest-rate" placeholder="Enter interest rate" step="0.01" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="start-date" class="form-label">Start Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+                                <input type="date" class="form-control" id="start-date" name="start-date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="end-date" class="form-label">End Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-calendar-check-line"></i></span>
+                                <input type="date" class="form-control" id="end-date" name="end-date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-save-line me-2"></i>Add Loan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('interest-checkbox').addEventListener('change', function() {
+    var interestFields = document.getElementById('interest-fields');
+    interestFields.style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+[x] Fix the debt form and route.
+[x] Correct the delete modal in transactions
+
+make html forms for update loans, debt, cc, subscription
+add delete buttons to laons, debt, cc, subscription
+
+Make the dashboard more visually appealing. (User's name, name prefix usage)
+Add func to let user add a profile picture - get library of free to use icons to integrate and let users choose if they dont want to upload their own.
+
+Check everything from registeration to end.
+    - Register
+    - Login
+    - Add account
+    - Budgets
+    - 10 Transactions 
+    - subscription
+    - credit card 
+    - debt
+    - loan
+    - goal
+    - update profile
+    - change password
+    - delete account (to be added)
+
+If all works then move on to making this better (To Think)

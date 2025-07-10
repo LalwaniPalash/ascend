@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% import '_macros.html' as macros %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center mb-2">Welcome back, {{ current_user.first_name or current_user.username }}!</h1>
+            <p class="text-center text-muted">Here's your financial overview</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="summary-card">
+                <div class="summary-label">Total Balance</div>
+                <div class="summary-amount text-primary">{{ macros.currency_symbol(current_user.currency) }}{{ total_balance }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="summary-card">
+                <div class="summary-label">Total Income</div>
+                <div class="summary-amount text-success">{{ macros.currency_symbol(current_user.currency) }}{{ summary.total_income }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="summary-card">
+                <div class="summary-label">Total Expenses</div>
+                <div class="summary-amount text-danger">{{ macros.currency_symbol(current_user.currency) }}{{ summary.total_expenses }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="summary-card">
+                <div class="summary-label">Net Balance</div>
+                <div class="summary-amount {% if summary.net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ macros.currency_symbol(current_user.currency) }}{{ summary.net_balance }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Accounts Section -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-wallet-3-line me-2"></i>Accounts
+                        </h5>
+                        <a href="{{ url_for('views.add_account') }}" class="btn btn-primary btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Account
+                        </a>
+                    </div>
+                    
+                    {% if accounts %}
+                        {% for account in accounts %}
+                        <div class="account-item">
+                            <div class="account-icon">
+                                <i class="ri-bank-card-line"></i>
+                            </div>
+                            <div class="account-details">
+                                <div class="account-name">{{ account.name }}</div>
+                                <div class="account-balance">{{ macros.currency_symbol(current_user.currency) }}{{ account.current_balance }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="ri-bank-line" style="font-size: 3rem; color: var(--muted);"></i>
+                            <h6 class="mt-3">No Accounts Yet</h6>
+                            <p class="text-muted">Start by adding your first account to track your finances.</p>
+                            <a href="{{ url_for('views.add_account') }}" class="btn btn-primary">
+                                <i class="ri-add-line me-2"></i>Add Your First Account
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Categories Section -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-pie-chart-line me-2"></i>Budget Categories
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" id="toggleChartView">
+                                <i class="ri-pie-chart-line me-1"></i>Chart
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="toggleListView">
+                                <i class="ri-list-check me-1"></i>List
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart View -->
+                    <div id="chartView">
+                        <div id="chartContainer" style="height: 300px;">
+                            <canvas id="budgetDoughnutChart"></canvas>
+                        </div>
+                        <div id="chartLegend" class="chart-legend mt-3"></div>
+                    </div>
+                    
+                    <!-- List View -->
+                    <div id="listView" style="display: none;">
+                        {% if budget_categories %}
+                            {% for category in budget_categories %}
+                            <div class="budget-category-item">
+                                <div class="budget-category-header">
+                                    <div class="budget-category-name">{{ category.name }}</div>
+                                    <div class="budget-category-frequency">{{ category.time_period }}</div>
+                                </div>
+                                <div class="budget-amounts">
+                                    <span class="budget-remaining">Remaining: {{ macros.currency_symbol(current_user.currency) }}{{ "%.2f"|format(category.remaining_amount) }}</span>
+                                    <span class="budget-total">Total: {{ macros.currency_symbol(current_user.currency) }}{{ "%.2f"|format(category.budget_amount) }}</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ (category.remaining_amount / category.budget_amount * 100)|round|int }}%;"
+                                         aria-valuenow="{{ (category.remaining_amount / category.budget_amount * 100)|round|int }}" 
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="ri-pie-chart-line" style="font-size: 3rem; color: var(--muted);"></i>
+                                <h6 class="mt-3">No Budget Categories</h6>
+                                <p class="text-muted">Create budget categories to track your spending.</p>
+                                <a href="{{ url_for('views.add_budget_category') }}" class="btn btn-success">
+                                    <i class="ri-add-line me-2"></i>Add Budget Category
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if budget_categories %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('views.add_budget_category') }}" class="btn btn-success">
+                            <i class="ri-add-line me-2"></i>Add Budget Category
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-exchange-line me-2"></i>Recent Transactions
+                        </h5>
+                        <a href="{{ url_for('views.add_transaction') }}" class="btn btn-info btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Transaction
+                        </a>
+                    </div>
+                    
+                    {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.date.strftime('%b %d, %Y') if transaction.date else 'N/A' }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td class="{% if transaction.type == 'Income' %}text-success{% elif transaction.type == 'Expense' %}text-danger{% endif %}">
+                                        {{ macros.currency_symbol(current_user.currency) }}{{ transaction.amount }}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if transaction.type == 'Expense' %}badge-expense{% elif transaction.type == 'Income' %}badge-income{% elif transaction.type == 'Transfer' %}badge-info{% else %}badge-warning{% endif %}">
+                                            {{ transaction.type }}
+                                        </span>
+                                    </td>
+                                    <td>{{ transaction.budget_category.name if transaction.budget_category else 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('views.update_transaction', id=transaction.id) }}" class="btn btn-outline-warning">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger delete-transaction" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteTransactionModal" 
+                                                    data-transaction-id="{{ transaction.id }}">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="ri-exchange-line" style="font-size: 3rem; color: var(--muted);"></i>
+                        <h6 class="mt-3">No Transactions Yet</h6>
+                        <p class="text-muted">Start tracking your income and expenses.</p>
+                        <a href="{{ url_for('views.add_transaction') }}" class="btn btn-info">
+                            <i class="ri-add-line me-2"></i>Add Your First Transaction
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Products Section -->
+    <div class="row">
+        <!-- Loans -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-bank-line me-2"></i>Loans
+                        </h5>
+                        <a href="{{ url_for('views.add_loan') }}" class="btn btn-primary btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Loan
+                        </a>
+                    </div>
+                    
+                    {% if loans %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Counterparty</th>
+                                    <th>Amount</th>
+                                    <th>Rate</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in loans %}
+                                <tr>
+                                    <td>{{ loan.counterparty_name }}</td>
+                                    <td>{{ macros.currency_symbol(current_user.currency) }}{{ loan.amount }}</td>
+                                    <td>{{ loan.interest_rate }}%</td>
+                                    <td>{{ loan.type }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('views.update_loan', id=loan.id) }}" class="btn btn-outline-warning">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('views.delete_loan', id=loan.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this loan?');">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-0">No loans recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit Cards -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-bank-card-line me-2"></i>Credit Cards
+                        </h5>
+                        <a href="{{ url_for('views.add_credit_card') }}" class="btn btn-warning btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Card
+                        </a>
+                    </div>
+                    
+                    {% if credit_cards %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Limit</th>
+                                    <th>Balance</th>
+                                    <th>Available</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for card in credit_cards %}
+                                <tr>
+                                    <td>{{ card.name }}</td>
+                                    <td>{{ macros.currency_symbol(current_user.currency) }}{{ card.limit }}</td>
+                                    <td class="text-danger">{{ macros.currency_symbol(current_user.currency) }}{{ card.current_balance }}</td>
+                                    <td class="text-success">{{ macros.currency_symbol(current_user.currency) }}{{ card.limit - card.current_balance }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('views.update_credit_card', id=card.id) }}" class="btn btn-outline-warning">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('views.delete_credit_card', id=card.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this credit card?');">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-0">No credit cards recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Financial Products -->
+    <div class="row">
+        <!-- Debts -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-error-warning-line me-2"></i>Debts
+                        </h5>
+                        <a href="{{ url_for('views.add_debt') }}" class="btn btn-danger btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Debt
+                        </a>
+                    </div>
+                    
+                    {% if debts %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Rate</th>
+                                    <th>End Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for debt in debts %}
+                                <tr>
+                                    <td>{{ debt.type }}</td>
+                                    <td class="text-danger">{{ macros.currency_symbol(current_user.currency) }}{{ debt.amount }}</td>
+                                    <td>{{ debt.interest_rate }}%</td>
+                                    <td>{{ debt.end_date.strftime('%b %Y') if debt.end_date else 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('views.update_debt', id=debt.id) }}" class="btn btn-outline-warning">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('views.delete_debt', id=debt.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this debt?');">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-0">No debts recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscriptions -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="ri-repeat-line me-2"></i>Subscriptions
+                        </h5>
+                        <a href="{{ url_for('views.add_subscription') }}" class="btn btn-secondary btn-sm">
+                            <i class="ri-add-line me-1"></i>Add Subscription
+                        </a>
+                    </div>
+                    
+                    {% if subscriptions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Amount</th>
+                                    <th>Frequency</th>
+                                    <th>Next Payment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subscription in subscriptions %}
+                                <tr>
+                                    <td>{{ subscription.name }}</td>
+                                    <td>{{ macros.currency_symbol(current_user.currency) }}{{ subscription.amount }}</td>
+                                    <td>{{ subscription.frequency }}</td>
+                                    <td>{{ subscription.next_payment_date.strftime('%b %d') if subscription.next_payment_date else 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('views.update_subscription', id=subscription.id) }}" class="btn btn-outline-warning">
+                                                <i class="ri-edit-line"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('views.delete_subscription', id=subscription.id) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete this subscription?');">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="text-muted mb-0">No subscriptions recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Transaction Modal -->
+<div class="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTransactionModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this transaction?</p>
+                <p class="text-danger"><strong>Warning:</strong> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="ri-close-line me-1"></i>Cancel
+                </button>
+                <form id="deleteTransactionForm" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ri-delete-bin-line me-1"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden currency symbol for JavaScript -->
+<span id="currencySymbol" style="display: none;">{{ macros.currency_symbol(current_user.currency) }}</span>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle between chart and list view for budget categories
+    const toggleChartView = document.getElementById('toggleChartView');
+    const toggleListView = document.getElementById('toggleListView');
+    const chartView = document.getElementById('chartView');
+    const listView = document.getElementById('listView');
+
+    toggleChartView.addEventListener('click', function() {
+        toggleChartView.classList.add('active');
+        toggleListView.classList.remove('active');
+        chartView.style.display = 'block';
+        listView.style.display = 'none';
+    });
+
+    toggleListView.addEventListener('click', function() {
+        toggleListView.classList.add('active');
+        toggleChartView.classList.remove('active');
+        listView.style.display = 'block';
+        chartView.style.display = 'none';
+    });
+
+    // Delete transaction functionality
+    const deleteButtons = document.querySelectorAll('.delete-transaction');
+    const deleteForm = document.getElementById('deleteTransactionForm');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const transactionId = this.getAttribute('data-transaction-id');
+            deleteForm.action = `/delete-transaction/${transactionId}`;
+        });
+    });
+
+    // Chart functionality (if budget categories exist)
+    {% if budget_categories %}
+    const labels = {{ labels | tojson | safe }};
+    const remainingAmounts = {{ remaining_amounts | tojson | safe }};
+    const budgetAmounts = {{ budget_amounts | tojson | safe }};
+
+    if (labels && labels.length > 0) {
+        const spentAmounts = budgetAmounts.map((total, index) => total - remainingAmounts[index]);
+        const colorPalette = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+        ];
+
+        const budgetData = {
+            labels: labels,
+            datasets: [{
+                data: budgetAmounts,
+                backgroundColor: colorPalette,
+                borderWidth: 0
+            }]
+        };
+
+        const currencySymbol = document.getElementById('currencySymbol').textContent.trim();
+
+        const config = {
+            type: 'doughnut',
+            data: budgetData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#1a1a1a',
+                            font: { size: 12 }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Budget Allocation',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        color: '#1a1a1a'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${currencySymbol}${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+            },
+        };
+
+        const ctx = document.getElementById('budgetDoughnutChart').getContext('2d');
+        new Chart(ctx, config);
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

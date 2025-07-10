@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="ri-user-add-line me-2"></i>Register
+                    </h2>
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <div class="mb-4">
+                            <label for="timezone" class="form-label">Timezone</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-global-line"></i></span>
+                                <select class="form-select" id="timezone" name="timezone" required>
+                                    <option value="">Select your timezone</option>
+                                    {% for timezone in timezones %}
+                                        <option value="{{ timezone }}">{{ timezone }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Name</label>
+                            <div class="row g-2">
+                                <div class="col-sm-4 col-lg-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="ri-user-line"></i></span>
+                                        <select class="form-select" id="name-prefix" name="name-prefix">
+                                            <option value="">Prefix</option>
+                                            <option value="Ms.">Ms.</option>
+                                            <option value="Mr.">Mr.</option>
+                                            <option value="Mrs.">Mrs.</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 col-lg-5">
+                                    <input required type="text" class="form-control" id="first-name" name="first-name" placeholder="First name">
+                                </div>
+                                <div class="col-sm-4 col-lg-4">
+                                    <input required type="text" class="form-control" id="last-name" name="last-name" placeholder="Last name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-mail-line"></i></span>
+                                <input required type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-lock-line"></i></span>
+                                <input required type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="confirmpass" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-lock-line"></i></span>
+                                <input required type="password" class="form-control" id="confirmpass" name="confirmpass" placeholder="Confirm password">
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="ri-user-add-line me-2"></i>Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 8px;
+}
+.input-group-text {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border-color: var(--card-border);
+}
+.form-control, .form-select {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--card-border);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+.btn-primary {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+@media (max-width: 575.98px) {
+    .col-sm-4 {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
